@@ -77,7 +77,7 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
             input_seq, mask, seq_inds = pad_seqs(input_seq, mask, seq_inds, max_gen_len-i-1, pad_token)
             break
 
-    return input_seq[:, -MAX_GEN_LEN:], mask, seq_inds
+    return input_seq, mask, seq_inds
 
 
 def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
