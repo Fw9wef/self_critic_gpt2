@@ -90,7 +90,7 @@ class Logger:
         gt = tokenizer.decode(gt_tokens.tolist(), skip_special_tokens=True)
         _, scores = get_r_one_rewards([gt_tokens], [abstract_tokens], tokenizer)
 
-        path_to_example = os.path.join(self.path_to_experiment, str(iteration)+'.txt')
+        path_to_example = os.path.join(self.examples_dir, str(iteration)+'.txt')
         with open(path_to_example, "w") as f:
             delimiter = "\n"*2 + "-"*80 + "\n"*2
             to_write = delimiter.join([article, abstract, gt, str(scores)])
