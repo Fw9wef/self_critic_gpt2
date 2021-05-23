@@ -46,7 +46,7 @@ for epoch in range(N_EPOCHS):
                                                   pad_token=tokenizer.pad_token_id)
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
 
-        sample_logits = model(input_ids=sample_seqs, attention_mask=mask, position_ids=seq_inds)
+        sample_logits = model(input_ids=sample_seqs.long(), attention_mask=mask.long(), position_ids=seq_inds.long())
         sample_logits = sample_logits[0][:, -MAX_GEN_LEN:]
         sample_seqs = sample_seqs[:, -MAX_GEN_LEN:]
         mask = mask[:, -MAX_GEN_LEN:]
