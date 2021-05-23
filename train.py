@@ -37,13 +37,13 @@ for epoch in range(N_EPOCHS):
                  'abstract': abstract}
 
         with torch.no_grad():
-            _, sample_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
-                                                               eos_token=tokenizer.bos_token_id,
-                                                               pad_token=tokenizer.pad_token_id)
+            sample_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+                                                            eos_token=tokenizer.bos_token_id,
+                                                            pad_token=tokenizer.pad_token_id)
             sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'], sample_seqs.detach(), tokenizer)
-            _, greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
-                                                     eos_token=tokenizer.bos_token_id,
-                                                     pad_token=tokenizer.pad_token_id)
+            greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
+                                                  eos_token=tokenizer.bos_token_id,
+                                                  pad_token=tokenizer.pad_token_id)
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
 
         total_mask = torch.cat([], dim=-1)
