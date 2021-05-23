@@ -74,8 +74,8 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
 
         generation_finished = torch.where(next_token == eos_token, ones, generation_finished)
         input_seq = torch.cat([input_seq, next_token], dim=-1)
-        mask = torch.cat([mask, 1-generation_finished], dim=-1)
-        new_inds = seq_inds[:, -1:] + (1 - generation_finished)
+        mask = torch.cat([mask, (1-generation_finished).long()], dim=-1)
+        new_inds = (seq_inds[:, -1:] + (1 - generation_finished)).long()
         seq_inds = torch.cat([seq_inds, new_inds], dim=-1)
 
         if torch.all(generation_finished == 1):
