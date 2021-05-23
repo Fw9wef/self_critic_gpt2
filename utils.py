@@ -40,7 +40,7 @@ def pad_seqs(input_seq, mask, seq_inds, n_pad, pad_token):
     mask = torch.cat([mask, pad_tensor], dim=-1)
 
     pad_tensor[:, :] = pad_token
-    input_seq = torch.cat([input_seq, pad_token], dim=-1)
+    input_seq = torch.cat([input_seq, pad_tensor], dim=-1)
 
     pad_tensor = torch.repeat_interleave(seq_inds[:, -1:], n_pad, dim=-1)
     seq_inds = torch.cat([seq_inds, pad_tensor])
