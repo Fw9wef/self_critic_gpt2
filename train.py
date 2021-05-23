@@ -46,8 +46,6 @@ for epoch in range(N_EPOCHS):
                                                   pad_token=tokenizer.pad_token_id)
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
 
-        total_mask = torch.cat([], dim=-1)
-        total_seq_inds = torch.cat([], dim=-1)
         sample_logits = model(input_ids=input_seq, attention_mask=mask, position_ids=seq_inds)
         sample_logits = sample_logits[-MAX_GEN_LEN:]
         mask = mask[-MAX_GEN_LEN:]
