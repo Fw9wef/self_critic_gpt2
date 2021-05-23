@@ -76,7 +76,7 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
         input_seq = torch.cat([input_seq, next_token], dim=-1)
         mask = torch.cat([mask, 1-generation_finished], dim=-1)
         new_inds = seq_inds[:, -1:] + (1 - generation_finished)
-        seq_inds = torch.cat([mask, new_inds], dim=-1)
+        seq_inds = torch.cat([seq_inds, new_inds], dim=-1)
 
         if torch.all(generation_finished == 1):
             gen_logits, input_seq, mask, seq_inds = pad_seqs(gen_logits, input_seq, mask, seq_inds, max_gen_len-i-1, pad_token)
