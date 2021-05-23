@@ -19,7 +19,7 @@ model = GPT2LMHeadModel.from_pretrained(PATH_TO_PRETRAIN_MODEL)
 optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 if N_GPUS > 1:
     device_map = get_device_map(N_GPUS)
-    model.paralelize(device_map)
+    model.parallelize(device_map)
 
 
 accumulated_batches = 0
