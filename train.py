@@ -11,7 +11,7 @@ from logger import Logger
 logger = Logger(PATH_TO_EXPERIMENT)
 train_data = Data(mode='train')
 train_data_loader = DataLoader(train_data, batch_size=BATCH_SIZE, num_workers=2, shuffle=True)
-valid_data = Data(mode='valid', length=50)
+valid_data = Data(mode='valid', length=12)
 val_data_loader = DataLoader(valid_data, batch_size=BATCH_SIZE, num_workers=2, shuffle=True)
 tokenizer = add_special_tokens()
 
