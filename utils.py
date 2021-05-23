@@ -56,18 +56,16 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
     if greedy:
         top_k = 1
 
-    input_seq = batch['article'].cuda()
-    mask = batch['article_mask'].cuda()
-    seq_inds = batch['article_position_ids'].cuda()
+    input_seq = batch['article']
+    mask = batch['article_mask']
+    seq_inds = batch['article_position_ids']
     batch_size = input_seq.shape[0]
 
-    gen_logits = list()
     generation_finished = torch.zeros((batch_size, 1)).cuda()
     ones = torch.ones_like(generation_finished).cuda()
     for i in range(max_gen_len):
         outputs = model(input_ids=input_seq, attention_mask=mask, position_ids=seq_inds)
         next_token_logits = outputs[0][:, -1, :]
-        gen_logits.append(next_token_logits)
         next_token_logits = top_k_top_p_filtering(next_token_logits, top_k=top_k, top_p=top_p)
         probs = torch.softmax(next_token_logits, dim=-1)
         next_token = torch.multinomial(probs, num_samples=1)
@@ -82,8 +80,7 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
             gen_logits, input_seq, mask, seq_inds = pad_seqs(gen_logits, input_seq, mask, seq_inds, max_gen_len-i-1, pad_token)
             break
 
-    return torch.cat(gen_logits, dim=-1), input_seq[:, -MAX_GEN_LEN:],\
-           mask[:, -MAX_GEN_LEN:], seq_inds[:, -MAX_GEN_LEN:]
+    return input_seq[:, -MAX_GEN_LEN:], mask, seq_inds
 
 
 def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
