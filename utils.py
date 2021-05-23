@@ -120,16 +120,18 @@ def validate(model, val_data_loader, tokenizer, logger, total_steps_passed):
             greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
                                                   eos_token=tokenizer.bos_token_id,
                                                   pad_token=tokenizer.pad_token_id)
-            greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
+            greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'],
+                                                                    greedy_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
             sample_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
                                                   eos_token=tokenizer.bos_token_id,
                                                   pad_token=tokenizer.pad_token_id)
-            sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'], sample_seqs.detach(), tokenizer)
+            sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
+                                                                    sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
             delta_reward = sample_rewards - greedy_rewards
             logger.log(delta_reward, greedy_rouge_scores, sample_rouge_scores, val=True)
 
     logger.write_rewards(val=True)
-    logger.save_example(batch['article'][0], greedy_seqs[0], batch['abstract'][0],
+    logger.save_example(batch['article'][0], greedy_seqs[0, -MAX_GEN_LEN:], batch['abstract'][0],
                         tokenizer, total_steps_passed)
