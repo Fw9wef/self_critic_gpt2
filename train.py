@@ -35,7 +35,7 @@ for epoch in range(N_EPOCHS):
             _, greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True)
         greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
 
-        delta_reward = sample_rewards - greedy_rewards
+        delta_reward = sample_rewards.cuda() - greedy_rewards.cuda()
         loss = loss_fct(delta_reward, sample_logits, sample_seqs, mask)
         loss.backward()
         accumulated_batches += 1

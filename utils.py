@@ -56,9 +56,9 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
     if greedy:
         top_k = 1
 
-    input_seq = batch['article']
-    mask = batch['article_mask']
-    seq_inds = batch['article_position_ids']
+    input_seq = batch['article'].cuda()
+    mask = batch['article_mask'].cuda()
+    seq_inds = batch['article_position_ids'].cuda()
     batch_size = input_seq.shape[0]
 
     gen_logits = list()
