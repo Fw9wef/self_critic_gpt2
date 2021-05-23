@@ -55,7 +55,7 @@ for epoch in range(N_EPOCHS):
         loss = loss_fct(delta_reward, sample_logits, sample_seqs.long(), mask)
         loss.backward()
         accumulated_batches += 1
-        logger.log(delta_reward, greedy_rewards, sample_rewards, val=False)
+        logger.log(delta_reward, greedy_rouge_scores, sample_rouge_scores, val=False)
 
         if accumulated_batches % ACCUMULATION_STEPS == 0:
             optimizer.step()

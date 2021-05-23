@@ -116,7 +116,7 @@ def validate(model, val_data_loader, tokenizer, logger, total_steps_passed):
             sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'], sample_seqs.detach(), tokenizer)
 
             delta_reward = sample_rewards - greedy_rewards
-            logger.log(delta_reward, greedy_rewards, sample_rewards, val=True)
+            logger.log(delta_reward, greedy_rouge_scores, sample_rouge_scores, val=True)
 
     logger.write_rewards(val=True)
     logger.save_example(batch['article'][0], greedy_seqs[0], batch['abstract'][0],
