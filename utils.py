@@ -36,7 +36,7 @@ def get_device_map(n_gpus):
 def pad_seqs(input_seq, mask, seq_inds, n_pad, pad_token):
     batch_size = input_seq.shape[0]
 
-    pad_tensor = torch.zeros((batch_size, n_pad))
+    pad_tensor = torch.zeros((batch_size, n_pad)).cuda()
     mask = torch.cat([mask, pad_tensor], dim=-1)
 
     pad_tensor[:, :] = pad_token
