@@ -108,11 +108,23 @@ def loss_fct(delta_reward, sample_logits, sample_seqs, sample_mask):
 def validate(model, val_data_loader, tokenizer, logger, total_steps_passed):
     for i, batch in enumerate(tqdm(val_data_loader)):
         with torch.no_grad():
+            input_seq = batch['article'].cuda()
+            mask = batch['article_mask'].cuda()
+            seq_inds = batch['article_position_ids'].cuda()
+            abstract = batch['abstract']
+            batch = {'article': input_seq,
+                     'article_mask': mask,
+                     'article_position_ids': seq_inds,
+                     'abstract': abstract}
 
-            _, greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True)
+            greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+                                                  eos_token=tokenizer.bos_token_id,
+                                                  pad_token=tokenizer.pad_token_id)
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'], greedy_seqs.detach(), tokenizer)
 
-            _, sample_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False)
+            sample_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+                                                  eos_token=tokenizer.bos_token_id,
+                                                  pad_token=tokenizer.pad_token_id)
             sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'], sample_seqs.detach(), tokenizer)
 
             delta_reward = sample_rewards - greedy_rewards
