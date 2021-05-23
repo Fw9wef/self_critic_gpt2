@@ -52,7 +52,7 @@ for epoch in range(N_EPOCHS):
         mask = mask[:, -MAX_GEN_LEN:]
 
         delta_reward = sample_rewards.cuda() - greedy_rewards.cuda()
-        loss = loss_fct(delta_reward, sample_logits, sample_seqs, mask)
+        loss = loss_fct(delta_reward, sample_logits, sample_seqs.long(), mask)
         loss.backward()
         accumulated_batches += 1
         logger.log(delta_reward, greedy_rewards, sample_rewards, val=False)
