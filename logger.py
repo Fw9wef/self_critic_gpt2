@@ -97,6 +97,8 @@ class Logger:
             f.write(to_write)
 
     def make_dirs(self):
+        if not os.path.isdir(self.path_to_experiment):
+            os.mkdir(self.path_to_experiment)
         if not os.path.isdir(self.metrics_dir):
             os.mkdir(self.metrics_dir)
         if not os.path.isdir(self.model_dir):
