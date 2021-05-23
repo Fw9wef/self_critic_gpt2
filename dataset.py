@@ -12,7 +12,7 @@ class Data(Dataset):
         self.root_dir = DATA_FOLDER  # папка с данными в формате json файлов (gpt2_1024_data)
         self.tokenizer = add_special_tokens()
         self.pad = self.tokenizer.encode(self.tokenizer.pad_token)
-        self.files = np.sort([x for x in os.listdir(root_dir) if x.endswith('.json')])
+        self.files = np.sort([x for x in os.listdir(self.root_dir) if x.endswith('.json')])
         self.mode = mode
         with open(PATH_TO_IDS_FILE , 'r') as f:
             self.data = json.load(f)
