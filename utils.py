@@ -123,13 +123,16 @@ def validate(model, val_data_loader, tokenizer, logger, total_steps_passed):
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'],
                                                                     greedy_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
-            sample_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
-                                                  eos_token=tokenizer.bos_token_id,
-                                                  pad_token=tokenizer.pad_token_id)
-            sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
-                                                                    sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
+            #sample_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+            #                                      eos_token=tokenizer.bos_token_id,
+            #                                      pad_token=tokenizer.pad_token_id)
+            #sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
+            #                                                        sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
-            delta_reward = sample_rewards - greedy_rewards
+            #delta_reward = sample_rewards - greedy_rewards
+            sample_rewards, sample_rouge_scores = greedy_rewards, greedy_rouge_scores
+            delta_reward = greedy_rewards
+
             logger.log(delta_reward, greedy_rouge_scores, sample_rouge_scores, val=True)
 
     logger.write_rewards(val=True)

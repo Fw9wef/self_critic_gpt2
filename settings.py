@@ -1,6 +1,6 @@
 N_GPUS = 2
 PATH_TO_PRETRAIN_MODEL = "../gpt2_summ_rl/output/long_train/4"
-PATH_TO_EXPERIMENT = "./experiments/test_exp"
+PATH_TO_EXPERIMENT = "./experiments/greedy_exp"
 N_EPOCHS = 2
 BATCH_SIZE = 4
 ACCUMULATION_STEPS = 2
