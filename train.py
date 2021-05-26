@@ -42,6 +42,7 @@ for epoch in range(N_EPOCHS):
             #                                                pad_token=tokenizer.pad_token_id)
             #sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
             #                                                        sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
+            print(tokenizer.decode(batch['article'][0]))
             greedy_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
                                                   eos_token=tokenizer.bos_token_id,
                                                   pad_token=tokenizer.pad_token_id)
