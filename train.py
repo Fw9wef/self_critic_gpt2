@@ -59,6 +59,7 @@ for epoch in range(N_EPOCHS):
         delta_reward = greedy_rewards.cuda()
 
         loss = loss_fct(delta_reward, sample_logits, sample_seqs.long(), mask)
+        print(loss)
         loss.backward()
         accumulated_batches += 1
         logger.log(delta_reward, greedy_rouge_scores, sample_rouge_scores, val=False)
