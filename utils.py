@@ -94,14 +94,13 @@ def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
 def logprobs_from_logits(logits, labels):
     logp = F.log_softmax(logits, dim=2)
     logpy = torch.gather(logp, 2, labels.unsqueeze(2)).squeeze(-1)
-    logprobs = torch.log(logpy+1e-6)
-    return logprobs
+    return logpy
 
 
 def loss_fct(delta_reward, sample_logits, sample_seqs, sample_mask):
     token_logprobs = logprobs_from_logits(sample_logits, sample_seqs)
     loss = delta_reward.unsqueeze(1) * token_logprobs * sample_mask
-    loss = torch.sum(loss, dim=-1) / (torch.sum(sample_mask, dim=-1) + 1e-6)
+    loss = torch.sum(loss, dim=-1) / torch.sum(sample_mask, dim=-1)
     loss = -torch.mean(loss)
     return loss
 
