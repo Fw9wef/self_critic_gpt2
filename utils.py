@@ -65,6 +65,7 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
         next_token_logits = outputs[0][:, -1, :]
         print(next_token_logits)
         probs = torch.softmax(next_token_logits, dim=-1)
+        print(probs)
         probs = top_k_top_p_filtering(probs, top_k=top_k, top_p=top_p)
         print(probs)
         next_token = torch.multinomial(probs, num_samples=1)
