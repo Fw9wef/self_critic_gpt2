@@ -100,7 +100,7 @@ def logprobs_from_logits(logits, labels):
 def loss_fct(delta_reward, sample_logits, sample_seqs, sample_mask):
     token_logprobs = logprobs_from_logits(sample_logits, sample_seqs)
     loss = delta_reward.unsqueeze(1) * token_logprobs * sample_mask
-    loss = torch.sum(loss, dim=-1) / torch.sum(sample_mask, dim=-1)
+    loss = torch.sum(loss, dim=-1) / (torch.sum(sample_mask, dim=-1) + 1e-6)
     loss = -torch.mean(loss)
     return loss
 
