@@ -63,6 +63,7 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
     for i in range(max_gen_len):
         outputs = model(input_ids=input_seq, attention_mask=mask, position_ids=seq_inds)
         next_token_logits = outputs[0][:, -1, :]
+        print(next_token_logits)
         probs = torch.softmax(next_token_logits, dim=-1)
         probs = top_k_top_p_filtering(probs, top_k=top_k, top_p=top_p)
         print(probs)
