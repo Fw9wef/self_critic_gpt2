@@ -37,26 +37,26 @@ for epoch in range(N_EPOCHS):
                  'abstract': abstract}
 
         with torch.no_grad():
-            #sample_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
-            #                                                eos_token=tokenizer.bos_token_id,
-            #                                                pad_token=tokenizer.pad_token_id)
-            #sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
-            #                                                        sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
-            greedy_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
-                                                  eos_token=tokenizer.bos_token_id,
-                                                  pad_token=tokenizer.pad_token_id)
-            greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'],#####
-                                                                    greedy_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
+            sample_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+                                                            eos_token=tokenizer.bos_token_id,
+                                                            pad_token=tokenizer.pad_token_id)
+            sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
+                                                                    sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
+            #greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
+            #                                      eos_token=tokenizer.bos_token_id,
+            #                                      pad_token=tokenizer.pad_token_id)
+            #greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'],
+            #                                                        greedy_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
-        sample_logits = model(input_ids=greedy_seqs.long(), attention_mask=mask.long(), position_ids=seq_inds.long())
+        sample_logits = model(input_ids=sample_seqs.long(), attention_mask=mask.long(), position_ids=seq_inds.long())
         sample_logits = sample_logits[0][:, -MAX_GEN_LEN:]
-        sample_seqs = greedy_seqs[:, -MAX_GEN_LEN:]#####
+        sample_seqs = sample_seqs[:, -MAX_GEN_LEN:]#####
         mask = mask[:, -MAX_GEN_LEN:]
 
         #delta_reward = sample_rewards.cuda() - greedy_rewards.cuda()
 
-        sample_rewards, sample_rouge_scores = greedy_rewards, greedy_rouge_scores
-        delta_reward = greedy_rewards.cuda()
+        greedy_rewards, greedy_rouge_scores = sample_rewards, sample_rouge_scores
+        delta_reward = sample_rewards.cuda()
 
         loss = loss_fct(delta_reward, sample_logits, sample_seqs.long(), mask)
         loss.backward()
@@ -71,5 +71,6 @@ for epoch in range(N_EPOCHS):
             logger.write_rewards(val=False)
 
         if total_steps_passed % STEPS_BTW_VALIDATIONS == 0:
-            results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
-            logger.save_model(model, epoch, total_steps_passed)
+            #results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
+            #logger.save_model(model, epoch, total_steps_passed)
+            print(1)
