@@ -1,9 +1,9 @@
 N_GPUS = 2
 PATH_TO_PRETRAIN_MODEL = "../gpt2_summ_rl/output/long_train/4"
-PATH_TO_EXPERIMENT = "./experiments/big_sample_exp_v2"
+PATH_TO_EXPERIMENT = "./experiments/delta_exp"
 N_EPOCHS = 2
 BATCH_SIZE = 4
-ACCUMULATION_STEPS = 16
+ACCUMULATION_STEPS = 4
 DATA_FOLDER = "../gpt2_summ_rl/CNN-DM/gpt2_1024_data"
 PATH_TO_IDS_FILE = "../gpt2_summ_rl/CNN-DM/ids.json"
 MAX_GEN_LEN = 100
