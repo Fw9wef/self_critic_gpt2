@@ -20,7 +20,7 @@ model = GPT2LMHeadModel.from_pretrained(PATH_TO_PRETRAIN_MODEL)
 optimizer = torch.optim.Adam(model.parameters(), lr=LR, betas=(BETA_1, BETA_2), eps=EPSILON)
 if N_GPUS > 1:
     model = DataParallel(model, device_ids=[i for i in range(N_GPUS)])
-
+model.cuda()
 
 accumulated_batches = 0
 total_steps_passed = 0
