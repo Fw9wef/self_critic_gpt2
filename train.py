@@ -68,6 +68,5 @@ for epoch in range(N_EPOCHS):
             logger.write_rewards(val=False)
 
         if total_steps_passed % STEPS_BTW_VALIDATIONS == 0:
-            #results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
-            #logger.save_model(model, epoch, total_steps_passed)
-            print(1)
+            results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
+            logger.save_model(model, epoch, total_steps_passed)
