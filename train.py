@@ -6,6 +6,7 @@ from dataset import Data
 from utils import loss_fct, add_special_tokens, get_device_map, generate_abstract, get_r_one_rewards, validate
 from settings import *
 from logger import Logger
+from model import DataParallel
 
 
 logger = Logger(PATH_TO_EXPERIMENT)
@@ -16,10 +17,9 @@ val_data_loader = DataLoader(valid_data, batch_size=BATCH_SIZE, num_workers=2, s
 tokenizer = add_special_tokens()
 
 model = GPT2LMHeadModel.from_pretrained(PATH_TO_PRETRAIN_MODEL)
-optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+optimizer = torch.optim.Adam(model.parameters(), lr=LR, betas=(BETA_1, BETA_2), eps=EPSILON)
 if N_GPUS > 1:
-    device_map = get_device_map(N_GPUS)
-    model.parallelize(device_map)
+    model = DataParallel(model, device_ids=[i for i in range(N_GPUS)])
 
 
 accumulated_batches = 0
@@ -68,5 +68,5 @@ for epoch in range(N_EPOCHS):
             logger.write_rewards(val=False)
 
         if total_steps_passed % STEPS_BTW_VALIDATIONS == 0:
-            results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
+            #results = validate(model, val_data_loader, tokenizer, logger, total_steps_passed)
             logger.save_model(model, epoch, total_steps_passed)
