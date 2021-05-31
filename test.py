@@ -36,7 +36,7 @@ for i, batch in enumerate(tqdm(val_data_loader)):
                  'abstract': abstract}
         n_seqs = abstract.shape[0]
 
-        greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
+        greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
                                               eos_token=tokenizer.bos_token_id,
                                               pad_token=tokenizer.pad_token_id)
 
