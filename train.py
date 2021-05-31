@@ -20,7 +20,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=LR)
 if N_GPUS > 1:
     device_map = get_device_map(N_GPUS)
     model.parallelize(device_map)
-
+else:
+    model.cuda()
 
 accumulated_batches = 0
 total_steps_passed = 0

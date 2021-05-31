@@ -1,4 +1,4 @@
-N_GPUS = 2
+N_GPUS = 1
 #PATH_TO_PRETRAIN_MODEL = "../gpt2_summ_rl/output/long_train/4"
 #PATH_TO_EXPERIMENT = "../gpt2_summ_rl/output/long_train/4"
 PATH_TO_PRETRAIN_MODEL = "./experiments/delta_work/weights/chk_epoch_0_iteration_2000"

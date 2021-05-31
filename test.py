@@ -17,6 +17,8 @@ model = GPT2LMHeadModel.from_pretrained(PATH_TO_PRETRAIN_MODEL)
 if N_GPUS > 1:
     device_map = get_device_map(N_GPUS)
     model.parallelize(device_map)
+else:
+    model.cuda()
 model.eval()
 
 total_seqs = 0
