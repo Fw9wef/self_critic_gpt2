@@ -46,5 +46,5 @@ for i, batch in enumerate(tqdm(val_data_loader)):
         total_r2 += scores['rouge2'][2]
         total_rl += scores['rougeL'][2]
 
-    with open(PATH_TO_EXPERIMENT+"test_results.txt", 'w') as f:
+    with open(PATH_TO_EXPERIMENT+"/test_results.txt", 'w') as f:
         f.write("%d sequenses tested\nrouge1: %.6f\nrouge2: %.6f\nrougeL: %f\n" % (total_seqs, total_r1/total_seqs, total_r2/total_seqs, total_rl/total_seqs))
