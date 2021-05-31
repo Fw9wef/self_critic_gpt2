@@ -82,11 +82,12 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
 
 def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
     rewards = []
+    r_scores = []
     for gt, pred in zip(gt_seqs, sample_seqs):
         gt_text = tokenizer.decode(gt.tolist(), skip_special_tokens=True)
         pred_text = tokenizer.decode(pred.tolist(), skip_special_tokens=True)
-        r_scores = rouge_scorer.score(gt_text, pred_text)
-        r_one = r_scores['rouge1'][2]
+        r_scores.append(rouge_scorer.score(gt_text, pred_text))
+        r_one = r_scores[-1]['rouge1'][2]
         rewards.append(r_one)
     return torch.Tensor(rewards), r_scores
 
