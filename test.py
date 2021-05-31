@@ -9,7 +9,7 @@ from logger import Logger
 
 
 logger = Logger(PATH_TO_EXPERIMENT)
-valid_data = Data(mode='valid', length=12)
+valid_data = Data(mode='valid')
 val_data_loader = DataLoader(valid_data, batch_size=BATCH_SIZE, num_workers=2, shuffle=True)
 tokenizer = add_special_tokens()
 
