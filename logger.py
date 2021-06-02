@@ -23,19 +23,23 @@ class Logger:
         self.val_greedy_path = os.path.join(self.metrics_dir, "val_greedy.txt")
         self.val_sample_path = os.path.join(self.metrics_dir, "val_sample.txt")
 
-    def log(self, delta, greedy, sample, val):
+    def log(self, delta, greedyt, samplet, val):
         if val:
             self.temp_val_delta_rewards += delta.tolist()
-            self.temp_val_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
-                                                 greedy['rougeL'][2], greedy['bleurt']])
-            self.temp_val_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
-                                                 sample['rougeL'][2], sample['bleurt']])
+            for greedy in greedyt:
+                self.temp_val_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
+                                                     greedy['rougeL'][2], greedy['bleurt']])
+            for sample in samplet:
+                self.temp_val_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
+                                                     sample['rougeL'][2], sample['bleurt']])
         else:
             self.temp_train_delta_rewards += delta.tolist()
-            self.temp_train_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
-                                                   greedy['rougeL'][2], greedy['bleurt']])
-            self.temp_train_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
-                                                   sample['rougeL'][2], sample['bleurt']])
+            for greedy in greedyt:
+                self.temp_train_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
+                                                       greedy['rougeL'][2], greedy['bleurt']])
+            for sample in samplet:
+                self.temp_train_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
+                                                       sample['rougeL'][2], sample['bleurt']])
 
     def write_rewards(self, val=False):
         self.write_delta_rewards(val)
