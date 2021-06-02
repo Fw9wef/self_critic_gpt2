@@ -67,7 +67,7 @@ class Logger:
             self.temp_val_greedy_rewards = list()
         else:
             temp = np.array(self.temp_train_greedy_rewards)
-            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2], np.mean(temp[:, 3])))
+            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]), np.mean(temp[:, 3]))
             with open(self.train_greedy_path, "a") as f:
                 f.write(write_str)
             self.temp_train_greedy_rewards = list()
