@@ -5,7 +5,9 @@ from rouge_score import rouge_scorer
 from tqdm import tqdm
 from settings import *
 rouge_scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
-
+from bleurt import score
+with tf.device('cpu'):
+    scorer = score.BleurtScorer('../bleurt/bleurt/bleurt-base-512/')
 
 def add_special_tokens():
     """ Returns GPT2 tokenizer after adding separator and padding tokens """
@@ -85,11 +87,13 @@ def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
     rewards = []
     r_scores = []
     for gt, pred in zip(gt_seqs, sample_seqs):
+        bleurt_reward = scorer.score([gt], [pred])[0]
         gt_text = tokenizer.decode(gt.tolist(), skip_special_tokens=True)
         pred_text = tokenizer.decode(pred.tolist(), skip_special_tokens=True)
         r_scores.append(rouge_scorer.score(gt_text, pred_text))
-        r_one = r_scores[-1]['rouge1'][2]
-        rewards.append(r_one)
+        r_scores[-1]['bleurt'] = bleurt_reward
+        #r_one = r_scores[-1]['rouge1'][2]
+        rewards.append(bleurt_reward)
     return torch.Tensor(rewards), r_scores
 
 

@@ -26,12 +26,16 @@ class Logger:
     def log(self, delta, greedy, sample, val):
         if val:
             self.temp_val_delta_rewards += delta.tolist()
-            self.temp_val_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2], greedy['rougeL'][2]])
-            self.temp_val_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2], sample['rougeL'][2]])
+            self.temp_val_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
+                                                 greedy['rougeL'][2], greedy['bleurt']])
+            self.temp_val_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
+                                                 sample['rougeL'][2], sample['bleurt']])
         else:
             self.temp_train_delta_rewards += delta.tolist()
-            self.temp_train_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2], greedy['rougeL'][2]])
-            self.temp_train_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2], sample['rougeL'][2]])
+            self.temp_train_greedy_rewards.append([greedy['rouge1'][2], greedy['rouge2'][2],
+                                                   greedy['rougeL'][2], greedy['bleurt']])
+            self.temp_train_sample_rewards.append([sample['rouge1'][2], sample['rouge2'][2],
+                                                   sample['rougeL'][2], sample['bleurt']])
 
     def write_rewards(self, val=False):
         self.write_delta_rewards(val)
@@ -53,13 +57,13 @@ class Logger:
     def write_greedy_rewards(self, val=False):
         if val:
             temp = np.array(self.temp_val_greedy_rewards)
-            write_str = "%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]))
+            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]), np.mean(temp[:, 3]))
             with open(self.val_greedy_path, "a") as f:
                 f.write(write_str)
             self.temp_val_greedy_rewards = list()
         else:
             temp = np.array(self.temp_train_greedy_rewards)
-            write_str = "%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]))
+            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2], np.mean(temp[:, 3])))
             with open(self.train_greedy_path, "a") as f:
                 f.write(write_str)
             self.temp_train_greedy_rewards = list()
@@ -67,13 +71,13 @@ class Logger:
     def write_sample_rewards(self, val=False):
         if val:
             temp = np.array(self.temp_val_sample_rewards)
-            write_str = "%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]))
+            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]), np.mean(temp[:, 3]))
             with open(self.val_sample_path, "a") as f:
                 f.write(write_str)
             self.temp_val_sample_rewards = list()
         else:
             temp = np.array(self.temp_train_sample_rewards)
-            write_str = "%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]))
+            write_str = "%.6f;%.6f;%.6f;%.6f\n" % (np.mean(temp[:, 0]), np.mean(temp[:, 1]), np.mean(temp[:, 2]), np.mean(temp[:, 3]))
             with open(self.train_sample_path, "a") as f:
                 f.write(write_str)
             self.temp_train_sample_rewards = list()
