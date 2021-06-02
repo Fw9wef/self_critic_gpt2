@@ -88,9 +88,9 @@ def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
     rewards = []
     r_scores = []
     for gt, pred in zip(gt_seqs, sample_seqs):
-        bleurt_reward = scorer.score([gt], [pred])[0]
         gt_text = tokenizer.decode(gt.tolist(), skip_special_tokens=True)
         pred_text = tokenizer.decode(pred.tolist(), skip_special_tokens=True)
+        bleurt_reward = scorer.score([gt_text], [pred_text])[0]
         r_scores.append(rouge_scorer.score(gt_text, pred_text))
         r_scores[-1]['bleurt'] = bleurt_reward
         #r_one = r_scores[-1]['rouge1'][2]
