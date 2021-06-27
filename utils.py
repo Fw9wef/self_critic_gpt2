@@ -1,14 +1,21 @@
 import torch
 import torch.nn.functional as F
 from transformers import GPT2Tokenizer, top_k_top_p_filtering
-from rouge_score import rouge_scorer
 from tqdm import tqdm
 from settings import *
+
+
+# создаем rouge scorer
+from rouge_score import rouge_scorer
 rouge_scorer = rouge_scorer.RougeScorer(['rouge1', 'rouge2', 'rougeL'], use_stemmer=True)
+
+
+# создаем bleurt scorer
 import tensorflow as tf
 from bleurt import score
 with tf.device('cpu'):
     scorer = score.BleurtScorer('../bleurt/bleurt/bleurt-base-512/')
+
 
 def add_special_tokens():
     """ Returns GPT2 tokenizer after adding separator and padding tokens """
@@ -19,6 +26,13 @@ def add_special_tokens():
 
 
 def get_device_map(n_gpus):
+    """
+    Вспомогательная функция, которая распределяет слои gpt2 small по gpu для вертикального распараллеливания
+    Params:
+        n_gpus: int: количество используемых gpu.
+    Returns:
+        device_map: dict: словарь с распределением слоев по gpu (https://huggingface.co/transformers/model_doc/gpt2.html#transformers.GPT2LMHeadModel.parallelize)
+    """
     n_gpt_layers = 12
     per_gpu_layers = n_gpt_layers//n_gpus
     additional_layers = n_gpt_layers%n_gpus
@@ -37,14 +51,33 @@ def get_device_map(n_gpus):
 
 
 def pad_seqs(input_seq, mask, seq_inds, n_pad, pad_token):
+    """
+    Вспомогательная функция. Дополняет тензоры до нужной длины справа.
+    Тензор с токенами дополняется pad токенами
+    Тензор с маской дополняется нулями
+    Тензор с индексами дополняется правыми значениями в тензоре. Индексы - порядковые номера токенов в последовательности.
+    Params:
+        input_seq: torch.Tensor: тензор с токенами
+        mask: torch.Tensor: тензор с маской
+        seq_inds: torch.Tensor: тензор с индексами
+        n_pad: int: на сколько нужно дополнить тензоры
+        pad_token: int:
+    Return:
+        input_seq: дополненный тензор токенов
+        mask: дополненный тензор с маской
+        seq_inds: дополненный тензор индексов
+    """
     batch_size = input_seq.shape[0]
 
+    # дополнение маски
     pad_tensor = torch.zeros((batch_size, n_pad)).cuda()
     mask = torch.cat([mask, pad_tensor], dim=-1)
 
+    # дополнение тензора с токенами
     pad_tensor[:, :] = pad_token
     input_seq = torch.cat([input_seq, pad_tensor], dim=-1)
 
+    # дополнение тензора с индексами
     pad_tensor = torch.repeat_interleave(seq_inds[:, -1:], n_pad, dim=-1)
     seq_inds = torch.cat([seq_inds, pad_tensor], dim=-1)
 
@@ -52,7 +85,26 @@ def pad_seqs(input_seq, mask, seq_inds, n_pad, pad_token):
 
 
 def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
-                      eos_token=-1, pad_token=-1, top_k = 0, top_p = 1.0):
+                      eos_token=-1, pad_token=-1, top_k=0, top_p=1.0):
+    """
+    Функция генерирует резюме для батча данных. Работает как в жадном режиме, так и в режиме сэмплирования токенов.
+    Params:
+        model: transformers.GPT2LMHeadModel: модель резюмирования
+        batch: dict: словарь с входными данными. 'article'
+                                                 'article_mask'
+                                                 'article_position_ids'
+        max_gen_len: int: максимальная длина генерируемых резюме
+        greedy: bool: если True - при генерации выбирается токен с наибольшей вероятностью.
+                      Если False - производится сэмплирование из распределения
+        eos_token: int: токен конца генерации резюме.
+        pad_token: int: pad токен
+        top_k: int: фильтрация топ top_k наиболее вероятных токенов
+        top_p: float: фильтрация топ top_p токенов по суммарной вероятности
+    Return:
+        input_seq: torch.Tensor: тензор токенов текста и резюме, разделенных токеном разделения и, возможно, pad токенами
+        mask: torch.Tensor: тензор соответствующих масок pad токенов
+        seq_inds: torch.Tensor: тензор индексов токенов. pad токены не увеличивают индекс.
+    """
     if greedy:
         top_k = 1
 
@@ -85,6 +137,16 @@ def generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
 
 
 def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
+    """
+    Функция вычисления наград и метрик.
+    Params:
+        gt_seqs: torch.Tensor: тензор с токенами гт резюме
+        sample_seqs: torch.Tensor: тензор с токенами сгенерированного резюме
+        tokenizer: GPT2Tokenizer: токенезатор
+    Return:
+        rewards: torch.Tensor: тензор с целевой метрикой
+        r_scores: list: список словарей, содержащих все вычисляемые метрики качества.
+    """
     rewards = []
     r_scores = []
     for gt, pred in zip(gt_seqs, sample_seqs):
@@ -99,12 +161,30 @@ def get_r_one_rewards(gt_seqs, sample_seqs, tokenizer):
 
 
 def logprobs_from_logits(logits, labels):
+    """
+    По логитам и сгенерированным токенам находит логарифмы вероятности сгенерированных токенов
+    Params:
+        logits: torch.Tensor: логиты генерации токенов
+        labels: torch.Tensor: сгенерированные токены
+    Return:
+        logpy: torch.Tensor: логарифм вероятности сгенерированного токена
+    """
     logp = F.log_softmax(logits, dim=2)
     logpy = torch.gather(logp, 2, labels.unsqueeze(2)).squeeze(-1)
     return logpy
 
 
 def loss_fct(delta_reward, sample_logits, sample_seqs, sample_mask):
+    """
+    Функция осуществляет вычисление ошибки сети для использования алгоритма reinforce.
+    Params:
+        delta_reward: torch.Tensor: награды за эпизоды (или разности наград для self-critic алгоритма)
+        sample_logits: torch.Tensor: логиты генерации токенов
+        sample_seqs: torch.Tensor: токены сгенерированных резюме
+        sample_mask: torch.Tensor: маска pad тензоров
+    Return:
+        loss: torch.Tensor: ошибка сети
+    """
     token_logprobs = logprobs_from_logits(sample_logits, sample_seqs)
     loss = token_logprobs * sample_mask
     loss = delta_reward.unsqueeze(1) * torch.sum(loss, dim=-1) / (torch.sum(sample_mask, dim=-1) + 1e-6)
@@ -113,6 +193,15 @@ def loss_fct(delta_reward, sample_logits, sample_seqs, sample_mask):
 
 
 def validate(model, val_data_loader, tokenizer, logger, total_steps_passed):
+    """
+    Функция выполняет валидацию и записывает результаты и примеры генерируемых резюме в txt файлы
+    Params:
+        model: модель генерации
+        val_data_loader: даталоадер с валидационным датасетом
+        tokenizer: токенизатор
+        logger: логгер
+        total_steps_passed: токущая итерация / количество пройденных шагов оптимизации
+    """
     for i, batch in enumerate(tqdm(val_data_loader)):
         with torch.no_grad():
             input_seq = batch['article'].cuda()

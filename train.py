@@ -28,6 +28,7 @@ total_steps_passed = 0
 
 for epoch in range(N_EPOCHS):
     for i, batch in enumerate(tqdm(train_data_loader)):
+        # переносим тензоры батча на видеокарту
         input_seq = batch['article'].cuda()
         mask = batch['article_mask'].cuda()
         seq_inds = batch['article_position_ids'].cuda()
@@ -38,23 +39,35 @@ for epoch in range(N_EPOCHS):
                  'abstract': abstract}
 
         with torch.no_grad():
+            # генерируем сэмплированные резюме, маски для них и индексы токенов
             sample_seqs, mask, seq_inds = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=False,
                                                             eos_token=tokenizer.bos_token_id,
                                                             pad_token=tokenizer.pad_token_id)
+            # и вычисляем для них метрики
             sample_rewards, sample_rouge_scores = get_r_one_rewards(batch['abstract'],
                                                                     sample_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
+
+            # генерируем жадные резюме
             greedy_seqs, _, _ = generate_abstract(model, batch, max_gen_len=MAX_GEN_LEN, greedy=True,
                                                   eos_token=tokenizer.bos_token_id,
                                                   pad_token=tokenizer.pad_token_id)
+            # и вычисляем для них метрики
             greedy_rewards, greedy_rouge_scores = get_r_one_rewards(batch['abstract'],
                                                                     greedy_seqs[:, -MAX_GEN_LEN:].detach(), tokenizer)
 
+        # вычисляем логиты генерации
         sample_logits = model(input_ids=sample_seqs.long(), attention_mask=mask.long(), position_ids=seq_inds.long())
         sample_logits = sample_logits[0][:, -MAX_GEN_LEN:]
         sample_seqs = sample_seqs[:, -MAX_GEN_LEN:]
         mask = mask[:, -MAX_GEN_LEN:]
 
+        # вычисляем разницу наград
         delta_reward = sample_rewards.cuda() - greedy_rewards.cuda()
+
+        """
+        для перехода от self-critic алгоритма к обычному reinforce можно убрать greedy_rewards из
+        выражения для delta_rewards. Также можно закоментить генерацию жадных резюме для ускорения вычислений
+        """
 
         loss = loss_fct(delta_reward, sample_logits, sample_seqs.long(), mask)
         loss.backward()
